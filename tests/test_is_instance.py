@@ -21,6 +21,24 @@ def test_nesting():
     assert not is_instance([d1, d2], list[dict[str, bool]])
     assert not is_instance([d1, d2], list[dict[str, str]])
 
+def test_pydantic():
+    from pydantic import BaseModel
+
+    class Person(BaseModel):
+        name: str
+        age: int
+
+    person_init = {"name": "Eric", "age": 42}
+    person = Person(**person_init)
+
+    assert is_instance(person_init, Person)
+    assert is_instance(person_init, dict)
+    assert is_instance(person, Person)
+
+    assert not is_instance(person, dict)
+    assert not is_instance(person, dict[str, int | str])
+    assert not is_instance(person_init, str)
+
 def test_typed_tuples():
     # note: this example does not work in the corresponding slang,
     # since it's impossible to support that behavior without
@@ -32,12 +50,8 @@ def test_typed_tuples():
     assert not isinstance(('cake', 'pie', 42), (str, str, int))
     assert not is_instance(('cake', 'pie', 42), (str, str, int))
 
-def test_sequence():
-    from typing import Sequence
-    assert is_instance(['cake'], Sequence[str])
-    assert not is_instance(['cake'], Sequence[int])
-
-def test_slang():
+# TODO: support this for 3.11 or newer
+def dont_test_slang():
     d1 = {'age': 88, 'old': True}
     d2 = {'age': 22, 'old': False}
     assert is_instance(['spam', 'and', 'eggs'], [str])

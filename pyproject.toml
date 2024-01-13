@@ -1,6 +1,6 @@
 [project]
 name = "is_instance"
-version = "0.0.8"
+version = "0.0.6"
 authors = [
     { name="Jason Wilkes", email="notarealdeveloper@gmail.com" },
     { name="Hudson Cooper", email="hncooper96@gmail.com" },
@@ -8,6 +8,7 @@ authors = [
 description = "A better isinstance for python"
 dependencies = [
     "callable_module",
+    "pydantic",
 ]
 
 [project.optional-dependencies]

@@ -49,3 +49,32 @@ False
 >>> is_instance([{'a': 1, 'b': None}, {'a': 3, 'b': 4}], [{str: int | None}])
 True
 ```
+
+`is_instance` can also be used in place of pydantic's `.model_validate` with `strict=True`.
+
+```python3
+>>> from pydantic import BaseModel
+>>> class Person(BaseModel):
+...    name: str
+...    age: int
+>>> person_init = {"name": "Eric", "age": 42}
+>>> person = Person(**person_init)
+
+>>> is_instance(person_init, Person)
+True
+
+>>> is_instance(person_init, dict)
+True
+
+>>> is_instance(person, Person)
+True
+
+>>> is_instance(person, dict)
+False
+
+>>> is_instance(person, dict[str, int | str])
+False
+
+>>> is_instance(person_init, str)
+False
+```
