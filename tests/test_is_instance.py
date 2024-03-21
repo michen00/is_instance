@@ -8,6 +8,7 @@ from collections.abc import (
 )
 
 import is_instance
+from is_instance.main import _ellipsis
 
 
 def test_compat():
@@ -60,6 +61,9 @@ def test_typed_tuples():
     assert not is_instance((1, "None", 2, None, 3), tuple[..., str, int, ..., str])
     assert not is_instance((1, "None", 2, None, 3), tuple[..., str, int, ..., ..., str])
     assert is_instance((1, "None", 2, None, 3), tuple[..., int, ..., ...])
+    assert not is_instance(
+        (1, "None", 2, None, 3), tuple[..., int, ..., str, None, int, int, ...]
+    )
 
 
 def test_slang():
@@ -104,3 +108,63 @@ def test_reversible():
 def test_sequence():
     assert is_instance(["cake"], Sequence[str])
     assert not is_instance(["cake"], Sequence[int])
+
+
+def test__ellipsis():
+
+    assert _ellipsis((1, "None", 2, None, 3), [..., str, int, ..., int])
+    assert _ellipsis((1, 2), [int, ...])
+    assert _ellipsis((1,), [int, ...])
+    assert not _ellipsis((), [int, ...])
+    assert _ellipsis((1, None, 2), [int, ..., int])
+    assert _ellipsis((1, None, 2), [int, ..., ..., int])
+    assert not _ellipsis((1, None, 2), [int, ..., int, ..., int])
+    assert _ellipsis((1, None, 2), [int, ..., None, ..., int])
+    assert _ellipsis((1, None, 2, None, 3), [int, ...])
+    assert _ellipsis((1, None, 2, None, 3), [..., int])
+    assert _ellipsis((1, "None", 2, None, 3), [..., int])
+    assert not _ellipsis((1, "None", 2, None, 3), [..., str])
+    assert not _ellipsis((1, "None", 2, None, 3), [..., str, int, ..., str])
+    assert not _ellipsis((1, "None", 2, None, 3), [..., str, int, ..., ..., str])
+    assert _ellipsis((1, "None", 2, None, 3), [..., int, ..., ...])
+
+    # Test case 1: Valid ordering with ellipsis
+    assert _ellipsis([1, 2, 3], [int, ..., int])
+    assert _ellipsis([1, 2, 3], [int, ..., ..., int])
+    assert _ellipsis([1, 2, 3], [int, ..., ..., ..., int])
+
+    # Test case 2: Valid ordering without ellipsis
+    # assert _ellipsis([1, 2, 3], [int, int, int])
+
+    # Test case 3: Invalid ordering with ellipsis
+    assert not _ellipsis([1, 2, 3], [int, ..., str])
+    assert not _ellipsis([1, 2, 3], [int, ..., ..., str])
+    assert not _ellipsis([1, 2, 3], [int, ..., ..., ..., str])
+
+    # Test case 4: Invalid ordering without ellipsis
+    # assert not _ellipsis([1, 2, 3], [int, int, str])
+
+    # Test case 5: Empty objects or types
+    assert not _ellipsis([], [int, ..., int])
+    # assert _ellipsis([1, 2, 3], [])
+    # assert _ellipsis([], [])
+
+    # Test case 6: Single object or type
+    # assert _ellipsis([1], [int])
+    assert not _ellipsis([1], [int, ..., int])
+    assert not _ellipsis([1], [int, ..., ..., int])
+
+    # Test case 7: Objects and types with different lengths
+    # assert not _ellipsis([1, 2, 3], [int, int])
+    # assert not _ellipsis([1, 2], [int, int, int])
+
+    # Test case 8: Objects and types with different types
+    assert not _ellipsis([1, 2, 3], [str, ..., int])
+    assert not _ellipsis([1, 2, 3], [int, ..., str])
+
+    # Test case 9: Objects and types with different orderings
+    assert _ellipsis([1, 2, 3], [int, ..., int, int])
+    assert _ellipsis([1, 2, 3], [int, int, ..., int])
+
+    # Test case 10: Objects and types with ellipsis in the middle
+    assert _ellipsis([1, 2, 3], [int, ..., int, ..., int])

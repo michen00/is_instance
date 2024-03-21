@@ -2,6 +2,7 @@
 # pylint: disable=all
 __all__ = [
     "is_instance",
+    "_ellipsis",
 ]
 
 import sys
@@ -96,28 +97,46 @@ def _ellipsis(objs, types_, /) -> bool:
     # with Ellipsis
     deque_dots = deque([...])
     while len(types_) >= 2:
-        if (first := types_[0] is not Ellipsis) or (last := types_[-1] is not Ellipsis):
-            if not objs:
+        if (first := types_[0] is not Ellipsis) or types_[-1] is not Ellipsis:
+            if (
+                not objs
+                or (first and not is_instance(objs.popleft(), types_.popleft()))
+                or (
+                    objs
+                    and not (
+                        (typ := types_.pop()) is Ellipsis
+                        or is_instance(objs.pop(), typ)
+                    )
+                )
+            ):
                 return False
-            if first and not is_instance(objs.popleft(), types_.popleft()):
-                return False
-            if not objs and types_ == deque_dots:
-                return True
-            if last:
-                obj, typ = objs.pop(), types_.pop()
-                if not (typ is Ellipsis or is_instance(obj, typ)):
-                    return False
+            # if (
+            #     objs
+            #     and last
+            #     and not (
+            #         (typ := types_.pop()) is Ellipsis or is_instance(objs.pop(), typ)
+            #     )
+            # ):
+            #     return False
+            # elif types_ == deque_dots:
+            #     return True
+            # if not objs and types_ == deque_dots:
+            #     return True
+            # if last:
+            #     obj, typ = objs.pop(), types_.pop()
+            #     if not (typ is Ellipsis or is_instance(obj, typ)):
+            #         return False
             continue
         break
     print(types_, 2)
-    if len(types_) == 1:
-        return types_[0] is Ellipsis or (
-            len(objs) != 1 and is_instance(objs[0], types_[0])
-        )
-    print(types_, 3)
+    # if len(types_) == 1:
+    #     return types_[0] is Ellipsis or (
+    #         len(objs) != 1 and is_instance(objs[0], types_[0])
+    #     )
+    # print(types_, 3)
 
-    # passing beyond this block additionally indicates that there remain fewer
-    # non-ellipsis types to check than objects
+    # # passing beyond this block additionally indicates that there remain fewer
+    # # non-ellipsis types to check than objects
     # if (non_ellipsis := len(types_) - Counter(types_)[...]) == (num_objs := len(objs)):
     #     return all(
     #         is_instance(obj, type_)
