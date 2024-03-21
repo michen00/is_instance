@@ -118,17 +118,17 @@ def _ellipsis(objs, types_, /) -> bool:
 
     # passing beyond this block additionally indicates that there remain fewer
     # non-ellipsis types to check than objects
-    if (non_ellipsis := len(types_) - Counter(types_)[...]) == (num_objs := len(objs)):
-        return all(
-            is_instance(obj, type_)
-            for obj, type_ in zip(
-                objs, filter(lambda _type: _type is not Ellipsis, types_)
-            )
-        )
-    print(types_, 4)
-    if non_ellipsis > num_objs:
-        return False
-    print(types_, 5)
+    # if (non_ellipsis := len(types_) - Counter(types_)[...]) == (num_objs := len(objs)):
+    #     return all(
+    #         is_instance(obj, type_)
+    #         for obj, type_ in zip(
+    #             objs, filter(lambda _type: _type is not Ellipsis, types_)
+    #         )
+    #     )
+    # print(types_, 4)
+    # if non_ellipsis > num_objs:
+    #     return False
+    # print(types_, 5)
 
     # split remaining types on ...
     split_types = []
