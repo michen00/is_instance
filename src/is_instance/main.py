@@ -11,6 +11,7 @@ import typing
 from collections import Counter, deque
 from collections.abc import Callable, Container, Generator, Iterable, Iterator, Mapping
 from functools import reduce
+from itertools import groupby
 from operator import or_
 
 
@@ -95,32 +96,37 @@ def _ellipsis(objs, types_, /) -> bool:
 
     # passing beyond this block indicates the remaining types sequence starts or ends
     # with Ellipsis
+    pop_objs_left, pop_objs_right = objs.popleft, objs.pop
+    pop_types_left, pop_types_right = types_.popleft, types_.pop
     while len(types_) >= 2 and not (
-        (first := types_[0] is Ellipsis) and types_[-1] is Ellipsis
+        (first := types_[0] is Ellipsis) and (last := types_[-1] is Ellipsis)
     ):
-        if not (objs and (first or is_instance(objs.popleft(), types_.popleft()))) or (
-            objs
-            and not ((typ := types_.pop()) is Ellipsis or is_instance(objs.pop(), typ))
+        if not (objs and (first or is_instance(pop_objs_left(), pop_types_left()))) or (
+            objs and not (last or is_instance(pop_objs_right(), pop_types_right()))
         ):
             return False
         continue
-        # break
     print(types_, 2)
 
-    # split remaining types on ...
-    split_types = []
-    store = split_types.append
-    intermediate_result = []
-    store_intermediate = intermediate_result.append
-    for _type in types_:
-        if _type is Ellipsis:
-            if intermediate_result:
-                store(intermediate_result)
-                intermediate_result = []
-            continue
-        store_intermediate(_type)
-    types_ = deque(split_types)
+    # split remaining types on Ellipsis
+    # split_types = []
+    # store = split_types.append
+    # intermediate_result = []
+    # store_intermediate = intermediate_result.append
+    # for _type in types_:
+    #     if _type is Ellipsis:
+    #         if intermediate_result:
+    #             store(intermediate_result)
+    #             intermediate_result = []
+    #         continue
+    #     store_intermediate(_type)
+    # types_ = deque(split_types)
     print(types_, 6)
+    types_ = deque(
+        [*group]
+        for key, group in groupby(types_, lambda typ: typ is Ellipsis)
+        if not key
+    )
 
     while types_:
         current_types = types_.popleft()
