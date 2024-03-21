@@ -1,3 +1,5 @@
+# type: ignore
+# pylint: disable=all
 from collections.abc import (
     Collection,
     Container,
@@ -51,6 +53,18 @@ def test_typed_tuples():
     assert is_instance((), tuple[()])
     assert not is_instance((), tuple[int, ...])
     assert is_instance((1, None, 2), tuple[int, ..., int])
+    assert is_instance((1, None, "2"), tuple[int, ..., str])
+    assert not is_instance(("1", None, 2), tuple[int, ..., str])
+    assert not is_instance(("1", None, 2), tuple[..., ..., str])
+    assert is_instance(("1", None, 2), tuple[..., ..., int])
+    assert is_instance(("1", None, 2), tuple[str, ..., int])
+    assert is_instance(("1", None, 2), tuple[str, ..., ...])
+    assert is_instance(("1", None, 2), tuple[str, None, ...])
+    assert is_instance(("", None, 2), tuple[str, None, ...])
+    assert is_instance((1, None, "2"), tuple[int, ..., str])
+    assert not is_instance((1, None, "2"), tuple[int, ..., None])
+    assert not is_instance((1, None, "2"), tuple[str, ..., int])
+    assert not is_instance((1, None, "2"), tuple[int, str])
     assert is_instance((1, None, 2), tuple[int, ..., ..., int])
     assert not is_instance((1, None, 2), tuple[int, ..., int, ..., int])
     assert is_instance((1, None, 2), tuple[int, ..., None, ..., int])

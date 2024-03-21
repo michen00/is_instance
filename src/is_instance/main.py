@@ -11,7 +11,7 @@ import typing
 from collections import Counter, deque
 from collections.abc import Callable, Container, Generator, Iterable, Iterator, Mapping
 from functools import reduce
-from itertools import groupby
+from itertools import groupby, tee, zip_longest
 from operator import or_
 
 
@@ -84,22 +84,30 @@ def _ellipsis(objs, types_, /) -> bool:
     objs, types_ = deque(objs), deque(types_)
 
     # collapse consecutive ellipses
-    last, _types = False, []
-    append = _types.append
-    for type_ in types_:
-        if type_ is Ellipsis and last is Ellipsis:
-            continue
-        append(type_)
-        last = type_
-    types_ = deque(_types)
-    print(types_, 1)
+    # _last, _types = False, []
+    # append = _types.append
+    # for type_ in types_:
+    #     if type_ is Ellipsis and _last is Ellipsis:
+    #         continue
+    #     append(type_)
+    #     _last = type_
+    # types_ = deque(_types)
+    # print(types_, 1)
+
+    types_iter1, types_iter2 = tee(types_)
+    next(types_iter2, None)
+    types_ = deque(
+        curr
+        for curr, next_ in zip_longest(types_iter1, types_iter2)
+        if curr is not Ellipsis or next_ is not Ellipsis
+    )
 
     # passing beyond this block indicates the remaining types sequence starts or ends
     # with Ellipsis
     pop_objs_left, pop_objs_right = objs.popleft, objs.pop
     pop_types_left, pop_types_right = types_.popleft, types_.pop
     while len(types_) >= 2 and not (
-        (first := types_[0] is Ellipsis) and (last := types_[-1] is Ellipsis)
+        (first := types_[0] is Ellipsis) & (last := types_[-1] is Ellipsis)
     ):
         if not (objs and (first or is_instance(pop_objs_left(), pop_types_left()))) or (
             objs and not (last or is_instance(pop_objs_right(), pop_types_right()))
