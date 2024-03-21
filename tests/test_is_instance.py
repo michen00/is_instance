@@ -50,6 +50,7 @@ def test_typed_tuples():
     assert is_instance((), tuple[()])
     assert not is_instance((), tuple[int, ...])
     assert is_instance((1, None, 2), tuple[int, ..., int])
+    assert is_instance((1, None, 2), tuple[int, ..., ..., int])
     assert not is_instance((1, None, 2), tuple[int, ..., int, ..., int])
     assert is_instance((1, None, 2), tuple[int, ..., None, ..., int])
     assert is_instance((1, None, 2, None, 3), tuple[int, ...])
@@ -57,6 +58,8 @@ def test_typed_tuples():
     assert is_instance((1, "None", 2, None, 3), tuple[..., int])
     assert not is_instance((1, "None", 2, None, 3), tuple[..., str])
     assert not is_instance((1, "None", 2, None, 3), tuple[..., str, int, ..., str])
+    assert not is_instance((1, "None", 2, None, 3), tuple[..., str, int, ..., ..., str])
+    assert is_instance((1, "None", 2, None, 3), tuple[..., int, ..., ...])
 
 
 def test_slang():
