@@ -94,12 +94,12 @@ def _ellipsis(objs, types_, /) -> bool:
     # types_ = deque(_types)
     # print(types_, 1)
 
-    types_iter1, types_iter2 = tee(types_)
-    next(types_iter2, None)
+    tee1, tee2 = tee(types_)
+    next(tee2, None)
     types_ = deque(
         curr
-        for curr, next_ in zip_longest(types_iter1, types_iter2)
-        if curr is not Ellipsis or next_ is not Ellipsis
+        for curr, next_ in zip_longest(tee1, tee2)
+        if not (curr is Ellipsis and next_ is Ellipsis)
     )
 
     # passing beyond this block indicates the remaining types sequence starts or ends
