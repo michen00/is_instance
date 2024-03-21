@@ -100,8 +100,8 @@ def _ellipsis(objs, types_, /) -> bool:
     ]:
         while current_types:
             if objs:
-                if is_instance(pop_objs_right(), current_types[-1]):
-                    current_types = current_types[:-1]
+                if is_instance(pop_objs_left(), current_types[0]):
+                    current_types = current_types[1:]
                 continue
             return False
 
