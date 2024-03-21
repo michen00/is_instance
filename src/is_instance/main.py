@@ -95,56 +95,17 @@ def _ellipsis(objs, types_, /) -> bool:
 
     # passing beyond this block indicates the remaining types sequence starts or ends
     # with Ellipsis
-    deque_dots = deque([...])
-    while len(types_) >= 2:
-        if not ((first := types_[0] is Ellipsis) and types_[-1] is Ellipsis):
-            if not (
-                objs and (first or is_instance(objs.popleft(), types_.popleft()))
-            ) or (
-                objs
-                and not (
-                    (typ := types_.pop()) is Ellipsis or is_instance(objs.pop(), typ)
-                )
-            ):
-                return False
-            # if (
-            #     objs
-            #     and last
-            #     and not (
-            #         (typ := types_.pop()) is Ellipsis or is_instance(objs.pop(), typ)
-            #     )
-            # ):
-            #     return False
-            # elif types_ == deque_dots:
-            #     return True
-            # if not objs and types_ == deque_dots:
-            #     return True
-            # if last:
-            #     obj, typ = objs.pop(), types_.pop()
-            #     if not (typ is Ellipsis or is_instance(obj, typ)):
-            #         return False
-            continue
-        break
+    while len(types_) >= 2 and not (
+        (first := types_[0] is Ellipsis) and types_[-1] is Ellipsis
+    ):
+        if not (objs and (first or is_instance(objs.popleft(), types_.popleft()))) or (
+            objs
+            and not ((typ := types_.pop()) is Ellipsis or is_instance(objs.pop(), typ))
+        ):
+            return False
+        continue
+        # break
     print(types_, 2)
-    # if len(types_) == 1:
-    #     return types_[0] is Ellipsis or (
-    #         len(objs) != 1 and is_instance(objs[0], types_[0])
-    #     )
-    # print(types_, 3)
-
-    # # passing beyond this block additionally indicates that there remain fewer
-    # # non-ellipsis types to check than objects
-    # if (non_ellipsis := len(types_) - Counter(types_)[...]) == (num_objs := len(objs)):
-    #     return all(
-    #         is_instance(obj, type_)
-    #         for obj, type_ in zip(
-    #             objs, filter(lambda _type: _type is not Ellipsis, types_)
-    #         )
-    #     )
-    # print(types_, 4)
-    # if non_ellipsis > num_objs:
-    #     return False
-    # print(types_, 5)
 
     # split remaining types on ...
     split_types = []
