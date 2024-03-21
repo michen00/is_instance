@@ -93,16 +93,11 @@ def _ellipsis(objs, types_, /) -> bool:
         continue
     assert types_[0] is Ellipsis and types_[-1] is Ellipsis
 
-    # split remaining types on Ellipsis
-    types_ = [
-        [*group]
+    for current_types in [
+        [*group]  # split remaining types on Ellipsis
         for key, group in groupby(types_, lambda typ: typ is Ellipsis)
         if not key
-    ]
-    pop_type = types_.pop
-
-    while types_:
-        current_types = pop_type()
+    ]:
         pop_current = current_types.pop
         while current_types:
             if objs:
