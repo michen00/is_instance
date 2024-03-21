@@ -17,9 +17,7 @@ def is_instance(obj, cls, /) -> bool:
     """Turducken typing."""
 
     if isinstance(cls, tuple):
-        if all(isinstance(sub, type) for sub in cls):
-            cls = reduce(or_, cls)
-            return is_instance(obj, cls)
+        return any(is_instance(obj, sub) for sub in cls)
 
     if isinstance(cls, types.UnionType):
         return any(is_instance(obj, sub) for sub in cls.__args__)
@@ -78,69 +76,83 @@ def is_instance(obj, cls, /) -> bool:
     raise TypeError(obj, cls)
 
 
-def _ellipsis(objs, types, /) -> bool:
+def _ellipsis(objs, types_, /) -> bool:
     """Check if objs is a valid ordering according to types in the subscript."""
-    objs, types = deque(objs), deque(types)
+    print("Called _ellipsis")
+    objs, types_ = deque(objs), deque(types_)
 
     # collapse consecutive ellipses
     last, _types = False, []
     append = _types.append
-    for type_ in types:
+    for type_ in types_:
         if type_ is Ellipsis and last is Ellipsis:
             continue
         append(type_)
         last = type_
-    types = _types
+    types_ = deque(_types)
+    print(types_, 1)
 
     # passing beyond this block indicates the remaining types sequence starts or ends
     # with Ellipsis
-    while len(types) >= 2:
-        if (first := types[0] is not Ellipsis) or (last := types[-1] is not Ellipsis):
+    deque_dots = deque([...])
+    while len(types_) >= 2:
+        if (first := types_[0] is not Ellipsis) or (last := types_[-1] is not Ellipsis):
             if not objs:
                 return False
-            if first and not is_instance(objs.popleft(), types.popleft()):
+            if first and not is_instance(objs.popleft(), types_.popleft()):
                 return False
-            if not objs:
-                return False
-            if last and not is_instance(objs.pop(), types.pop()):
-                return False
+            if not objs and types_ == deque_dots:
+                return True
+            if last:
+                obj, typ = objs.pop(), types_.pop()
+                if not (typ is Ellipsis or is_instance(obj, typ)):
+                    return False
             continue
         break
-    if len(types) == 1:
-        return len(objs) != 1 and is_instance(objs[0], types[0])
+    print(types_, 2)
+    if len(types_) == 1:
+        return types_[0] is Ellipsis or (
+            len(objs) != 1 and is_instance(objs[0], types_[0])
+        )
+    print(types_, 3)
 
     # passing beyond this block additionally indicates that there remain fewer
     # non-ellipsis types to check than objects
-    if (non_ellipsis := len(types) - Counter(types)[...]) == (num_objs := len(objs)):
+    if (non_ellipsis := len(types_) - Counter(types_)[...]) == (num_objs := len(objs)):
         return all(
             is_instance(obj, type_)
             for obj, type_ in zip(
-                objs, filter(lambda _type: _type is not Ellipsis, types)
+                objs, filter(lambda _type: _type is not Ellipsis, types_)
             )
         )
+    print(types_, 4)
     if non_ellipsis > num_objs:
         return False
+    print(types_, 5)
 
     # split remaining types on ...
     split_types = []
     store = split_types.append
     intermediate_result = []
     store_intermediate = intermediate_result.append
-    for _type in types:
-        if _type is Ellipsis and intermediate_result:
-            store(intermediate_result)
-            intermediate_result = []
+    for _type in types_:
+        if _type is Ellipsis:
+            if intermediate_result:
+                store(intermediate_result)
+                intermediate_result = []
             continue
         store_intermediate(_type)
-    types = deque(split_types)
+    types_ = deque(split_types)
+    print(types_, 6)
 
-    while types:
-        current_types = types.popleft()
+    while types_:
+        current_types = types_.popleft()
         while current_types:
             if not objs:
                 return False
-            if not is_instance(objs.popleft(), current_types.popleft()):
-                return False
+            if not is_instance(objs.pop(), current_types[-1]):
+                continue
+            current_types.pop()
 
     return True
 
