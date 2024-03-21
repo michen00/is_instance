@@ -98,11 +98,10 @@ def _ellipsis(objs, types_, /) -> bool:
         for key, group in groupby(types_, lambda typ: typ is Ellipsis)
         if not key
     ]:
-        pop_current = current_types.pop
         while current_types:
             if objs:
                 if is_instance(pop_objs_right(), current_types[-1]):
-                    pop_current()
+                    current_types = current_types[:-1]
                 continue
             return False
 
