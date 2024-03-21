@@ -109,27 +109,14 @@ def _ellipsis(objs, types_, /) -> bool:
     print(types_, 2)
 
     # split remaining types on Ellipsis
-    # split_types = []
-    # store = split_types.append
-    # intermediate_result = []
-    # store_intermediate = intermediate_result.append
-    # for _type in types_:
-    #     if _type is Ellipsis:
-    #         if intermediate_result:
-    #             store(intermediate_result)
-    #             intermediate_result = []
-    #         continue
-    #     store_intermediate(_type)
-    # types_ = deque(split_types)
-    print(types_, 6)
-    types_ = deque(
+    types_ = [
         [*group]
         for key, group in groupby(types_, lambda typ: typ is Ellipsis)
         if not key
-    )
+    ]
 
     while types_:
-        current_types = types_.popleft()
+        current_types = types_.pop()
         while current_types:
             if not objs:
                 return False
