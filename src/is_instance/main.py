@@ -97,16 +97,13 @@ def _ellipsis(objs, types_, /) -> bool:
     # with Ellipsis
     deque_dots = deque([...])
     while len(types_) >= 2:
-        if (first := types_[0] is not Ellipsis) or types_[-1] is not Ellipsis:
-            if (
-                not objs
-                or (first and not is_instance(objs.popleft(), types_.popleft()))
-                or (
-                    objs
-                    and not (
-                        (typ := types_.pop()) is Ellipsis
-                        or is_instance(objs.pop(), typ)
-                    )
+        if not ((first := types_[0] is Ellipsis) and types_[-1] is Ellipsis):
+            if not (
+                objs and (first or is_instance(objs.popleft(), types_.popleft()))
+            ) or (
+                objs
+                and not (
+                    (typ := types_.pop()) is Ellipsis or is_instance(objs.pop(), typ)
                 )
             ):
                 return False
