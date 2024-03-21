@@ -81,15 +81,15 @@ def is_instance(obj, cls, /) -> bool:
 def _ellipsis(objs, types_, /) -> bool:
     """Check if objs is a valid ordering according to types in the subscript."""
     # collapse consecutive ellipses
-    tee1, tee2 = tee(types_)
-    next(tee2, None)
-    types_ = deque(
-        curr
-        for curr, next_ in zip_longest(tee1, tee2)
-        if not (curr is Ellipsis and next_ is Ellipsis)
-    )
+    # tee1, tee2 = tee(types_)
+    # next(tee2, None)
+    # types_ = deque(
+    #     curr
+    #     for curr, next_ in zip_longest(tee1, tee2)
+    #     if not (curr is Ellipsis and next_ is Ellipsis)
+    # )
 
-    objs = deque(objs)
+    objs, types_ = deque(objs), deque(types_)
     pop_objs_left, pop_objs_right = objs.popleft, objs.pop
     pop_types_left, pop_types_right = types_.popleft, types_.pop
     while len(types_) >= 2 and not (
@@ -108,15 +108,17 @@ def _ellipsis(objs, types_, /) -> bool:
         for key, group in groupby(types_, lambda typ: typ is Ellipsis)
         if not key
     ]
+    pop_type = types_.pop
 
     while types_:
-        current_types = types_.pop()
+        current_types = pop_type()
+        pop_current = current_types.pop
         while current_types:
             if not objs:
                 return False
-            if not is_instance(objs.pop(), current_types[-1]):
+            if not is_instance(pop_objs_right(), current_types[-1]):
                 continue
-            current_types.pop()
+            pop_current()
 
     return True
 
