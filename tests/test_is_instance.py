@@ -182,3 +182,63 @@ def test__ellipsis():
 
     # Test case 10: Objects and types with ellipsis in the middle
     assert _ellipsis([1, 2, 3], [int, ..., int, ..., int])
+
+
+def test2_typed_tuples2():
+    assert is_instance((1, None, 2), tuple[int, ..., ..., ..., ..., int])
+    assert not is_instance((1, None, 2), tuple[int, ..., ..., ..., ..., str])
+
+    assert not is_instance(
+        (1, 1, 1, 1, 11, 1, 1, 9, 1, 1, 1, 1, 2),
+        tuple[int, ..., ..., None, ..., ..., int],
+    )
+    assert is_instance(
+        (1, None, 1, 1, 1, 11, 1, 1, 9, 1, 1, 1, 1, 2),
+        tuple[int, ..., ..., None, ..., ..., int],
+    )
+
+    assert is_instance((1, 2, 3, 3, 5, 6, 7), tuple[int, int, int, int, int, int, int])
+    assert is_instance((1, 2, 3, 3, 5, 6, 7), tuple[int, ..., int, int, int, int, int])
+    assert is_instance((1, 2, 3, 3, 5, 6, 7), tuple[int, ..., int, ..., int, int, int])
+    assert is_instance((1, 2, 3, 3, 5, 6, 7), tuple[int, ..., int, ..., ..., int, int])
+    assert is_instance((1, 2, 3, 3, 5, 6, 7), tuple[int, ..., int, ..., ..., ..., int])
+    assert is_instance((1, 2, 3, 3, 5, 6, 7), tuple[int, ..., int, ..., ..., ..., ...])
+    assert is_instance((1, 2, 3, 3, 5, 6, 7), tuple[int, ..., int, ..., ..., ..., int])
+    assert is_instance((1, 2, 3, 3, 5, 6, 7), tuple[int, ..., int, ..., ..., int, ...])
+
+    assert not is_instance((1, 2, 3, 3, 5, 6), tuple[int, int, int, int, int, int, int])
+    assert not is_instance((1, 2, 3, 3, 5), tuple[int, ..., int, int, int, int, int])
+    assert not is_instance(
+        (1, 2, 3, 3, 5, None, 6, 7), tuple[int, ..., int, ..., int, int, int]
+    )
+    assert is_instance(
+        (1, 2, 3, 3, None, None, 5, 6, 7), tuple[int, ..., int, ..., int, int, int]
+    )
+    assert not is_instance(
+        (1, 2, 3, 3, 5, 6, 7, None), tuple[int, ..., int, ..., ..., int, int]
+    )
+    assert not is_instance(
+        (None, 1, 2, 3, 3, 5, 6, 7), tuple[int, ..., int, ..., ..., ..., int]
+    )
+    assert not is_instance(
+        (None, 1, 2, 3, 3, 5, 6, 7), tuple[int, ..., int, ..., ..., ..., ...]
+    )
+    assert is_instance(
+        (None, 1, 2, 3, 3, 5, 6, 7), tuple[None, int, ..., int, ..., ..., ..., ...]
+    )
+    assert not is_instance(
+        (1, 2, 3, 3, 5, 6, 7), tuple[int, ..., int, ..., None, ..., ..., int]
+    )
+    assert not is_instance(
+        (1, 2, 3, 3, 5, 6, 7), tuple[int, ..., None, ..., ..., int, ...]
+    )
+
+    assert is_instance((1, "None", 2, None, "3"), tuple[..., str])
+    assert is_instance((1, "None", 2, None, "3"), tuple[..., str, int, ..., str])
+    assert is_instance((1, "None", 2, None, "3"), tuple[..., str, int, ..., ..., str])
+    assert not is_instance(("1", "None", "2", None, "3"), tuple[..., int, ..., ...])
+
+    assert not is_instance((1, None, 2, None, 3), tuple[..., str, ...])
+    assert not is_instance((1, "None", 2, None), tuple[..., str, int, ..., str, ...])
+    assert not is_instance((1, "None", 2, None), tuple[..., str, int, ..., ..., str])
+    assert is_instance(("1", "None", 0, "2", None, "3"), tuple[..., int, ..., ...])

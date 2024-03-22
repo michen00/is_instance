@@ -83,6 +83,8 @@ def _ellipsis(objs, types_, /) -> bool:
     objs, types_ = deque(objs), deque(types_)
     pop_objs_left, pop_objs_right = objs.popleft, objs.pop
     pop_types_left, pop_types_right = types_.popleft, types_.pop
+
+    # remove leading and trailing non-Ellipsis from types_ queue
     while len(types_) >= 2 and not (
         (first := types_[0] is Ellipsis) & (last := types_[-1] is Ellipsis)
     ):
